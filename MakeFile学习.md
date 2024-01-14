@@ -50,3 +50,70 @@ gcc hello.o -o hello
 ## 动态库
 
 在程序编译时并不会被连接到目标代码中，而是在程序运行是才被载入。这就带来了一个明显的好处：不同的应用程序如果调用相同的库，那么在内存里**只需要有一份该共享库的实例**，减小了各个模块之间的耦合程度，也减小了可执行文件的体积。
+
+# MakeFile
+
+## 基本格式
+
+```makefile
+target ... : prerequisites ...
+    command
+    ...
+    ...
+```
+
+make debug执行下面的命令
+
+```makefile
+debug:
+	echo hello
+.PHONY: clean # 伪目标
+clean:
+	rm *.o
+```
+
+## 变量
+
+```makefile
+cpp := src/main.cpp
+obj := obj/main.o
+
+${obj}: ${cpp}
+	g++ -c ${cpp} -o ${obj}
+	# $@ target的名称
+	# $< 第一个依赖文件
+	# $^ 所有的依赖文件
+
+compile: ${obj}
+
+clean:
+	rm -rf obj
+	# Windows下使用del obj
+
+.PHONY: clean debug
+```
+
+## 运算符号
+
+:=：赋值后不可改变
+
+= ：可以改变
+
+?=：在变量尚未设置时才将其设置为值
+
++=：添加
+
+\：续行符
+
+## 函数
+
+shell
+
+subst、patsubst
+
+foreach
+
+dir
+
+notdir、filter
+

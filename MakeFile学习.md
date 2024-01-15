@@ -107,13 +107,47 @@ clean:
 
 ## 函数
 
-shell
+shell：把执行操作系统命令后的输出作为函数返回，本质上就是执行shell命令。
+
+```makefile
+cpp_srcs := ${shell find src -name *.cpp}
+```
 
 subst、patsubst
 
+格式：源字符串都是`<text>`的内容
+
+```makefile
+$(subst <from>,<to>,<text>)
+$(patsubst <pattern>,<replacement>,<text>) # pattern中的%和replacement中的%相同
+```
+
 foreach
+
+```makefile
+$(foreach <var>,<list>,<text>)
+
+# eg
+names := a b c d
+files := $(foreach n,$(names),$(n).o)
+# $(file) := a.o b.o c.o d.o 
+```
 
 dir
 
+```makefile
+$(dir <names...>) #取目录函数
+$(dir src/foo.c hacks) # 返回值是 src/ ./
+```
+
 notdir、filter
+
+```makefile
+$(notdir <names...>) # 取文件函数
+$(notdir src/foo.c hacks) # 返回值是 foo.c hacks
+$(filter <pattern...>,<text>) # 过滤出text中符合pattern的字符串
+sources := foo.c bar.c baz.s ugh.h
+foo: $(sources)
+	cc $(filter %.c %.s,$(sources)) -o foo # $(filter %.c %.s,$(sources)) 返回的值是 foo.c bar.c baz.s
+```
 

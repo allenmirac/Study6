@@ -287,3 +287,139 @@ int main(){
 }
 ```
 
+## 函数指针数组
+
+```c++
+#include <iostream>
+using namespace std;
+void func(){
+  cout<<"func"<<endl;
+}
+
+int add(int a, int b){
+  return a+b;
+}
+int sub(int a, int b){
+  return a - b;
+} 
+int mul(int a, int b){
+  return a*b;
+}
+int div11(int a, int b){
+  return a/b;
+}
+int main(){
+  int a=1;
+  int b=2;
+  int *p=&a;
+  printf("%p--%p\n", &a, p);
+
+  int (*pFunc[4])(int, int)={add, sub, mul, div11};
+  for(int i=0; i<4; i++){
+    cout<<(*pFunc[i])(a, b)<<endl;
+  }
+  return 0;
+}
+```
+
+## 函数指针深度辨析
+
+！！！！！！！！！！！！！
+
+```c++
+#include <iostream>
+using namespace std;
+void func(){
+  cout<<"func"<<endl;
+}
+
+int add(int a, int b){
+  return a+b;
+}
+int main(){
+  void (*pFunc)()=&func;
+  printf("%p\n", &pFunc);
+  printf("%p\n", pFunc);
+  printf("%p\n", *pFunc);
+  printf("%p\n", **pFunc);
+  printf("%p\n", ***pFunc);
+
+  printf("----------\n");
+  printf("%p\n", &func);
+  printf("%p\n", func);
+  printf("%p\n", *func);
+  printf("%p\n", **func);
+  printf("%p\n", ***func);
+
+
+  return 0;
+}
+```
+
+
+
+## 结构体内存对齐
+
+```c++
+#include <iostream>
+using namespace std;
+
+#define sz(type) cout<<sizeof(type)<<endl;
+struct stu{
+  char c;
+  short a;
+  int *b;
+};//8
+struct stu1{
+  char c;
+  int *b;
+  short a;
+};//12
+struct stu2
+{
+  double a;
+  char b;
+  int *c;
+};//16
+struct stu3
+{
+  char b;
+  double a;
+  int *c;
+};//24
+
+int main(){
+  sz(stu);
+  sz(stu1);
+  sz(stu2);
+  sz(stu3);
+  return 0;
+}
+```
+
+## 结构体指针
+
+```c++
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+struct Stu{
+  int a;
+  char c[13];
+};
+int main(){
+  Stu s;
+  s.a=12;
+  strcpy(s.c, "121");
+  cout<<sizeof(s)<<endl;
+  cout<<s.a<<"--"<<s.c<<endl;
+
+  Stu *pStu=(Stu *)malloc(sizeof(Stu));
+  pStu->a=11;
+  strcpy(pStu->c,"qwe");
+  cout<<pStu->a<<"---"<<pStu->c<<endl;
+  return 0;
+}
+```
+

@@ -151,3 +151,84 @@ foo: $(sources)
 	cc $(filter %.c %.s,$(sources)) -o foo # $(filter %.c %.s,$(sources)) 返回的值是 foo.c bar.c baz.s
 ```
 
+## 编译带有头文件的项目
+
+Makefile示例（1）：
+
+```makefile
+cpp_srcs := $(shell find src -name *.cpp)
+cpp_objs := $(patsubst src/%.cpp,objs/%.o,$(cpp_srcs))
+
+# 你的头文件所在文件夹路径（建议绝对路径）
+include_paths := 
+I_flag        := $(include_paths:%=-I%)
+
+
+objs/%.o : src/%.cpp
+	@mkdir -p $(dir $@)
+	@g++ -c $^ -o $@ $(I_flag)
+
+workspace/exec : $(cpp_objs)
+	@mkdir -p $(dir $@)
+	@g++ $^ -o $@ 
+
+run : workspace/exec
+	@./$<
+
+debug :
+	@echo $(I_flag)
+
+clean :
+	@rm -rf objs
+
+.PHONY : debug run
+```
+
+Makefile示例（2）：
+
+```makefile
+
+# Compiler
+CXX := g++
+
+# cpp sources
+cpp_srcs := ${shell find src -name *.cpp}
+# $(warning cpp_srcs is ${cpp_srcs})
+
+# cpp objects
+cpp_objs := ${patsubst src/%.cpp,objs/%.o,${cpp_srcs}}
+# $(warning cpp_objs is ${cpp_objs})
+
+# cpp include path
+include_path := /home/mirac/Desktop/Retest/include
+I_flags := ${include_path:%=-I%}
+# ${warning I_flags is ${I_flags}}
+
+# compile option
+Compile_option := -g -O3 -w
+Compile_option += ${I_flags}
+# $(warning Compile_option is ${Compile_option})
+
+objs/%.o : src/%.cpp
+	@mkdir -p ${dir $@}
+	@${CXX} -o $@ -c $^  ${Compile_option}
+
+workspace/testJson: ${cpp_objs}
+	@${CXX} -o $@  $^ 
+
+run : workspace/testJson
+	@./$<
+
+debug:
+	echo ${cpp_srcs}
+	echo ${cpp_objs}
+	echo ${I_flags}
+# @echo ${CC} -o $@ -c $^  ${Compile_option}
+
+clean : 
+	@rm -r objs
+	@rm -r workspace/*
+
+.PHONY: clean debug
+```
+

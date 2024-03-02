@@ -159,7 +159,15 @@ int main()
 
 2、通过基类指针指向派生类，并且访问派生类重写的方法。
 
-3、基类中的被重写的方法是虚函数
+3、基类中的被重写的方法是**虚函数**
+
+这种技术让父类指针有**多种形态**，是一种泛型技术，直到运行时才决定执行哪个版本的函数。所谓**泛型技术**，就是使用不变的代码来实现可变的算法。多态中没有重写的函数是没有意义的。
+
+水能载舟，亦能覆舟。多态也涉及了**安全性**的问题，
+
+首先是无法访问子类中自己的虚函数，如`Base * base=new Derived(); base->f1();`编译时不会通过的（其中f1()是子类自己的虚函数，父类没有）；
+
+然后是如果父类中虚函数是private或者protected，这些函数依旧会存在于虚函数表中，可以通过多态的方式来访问。
 
 ```c++
 #include <iostream>
@@ -197,7 +205,82 @@ int main() {
 
 ## 菱形继承的问题
 
+继承关系画成图像一个菱形，所以就叫做菱形继承，采用**虚继承**来解决二义性问题。
+
 ## 虚析构
+
+总的来说是为了避免内存泄漏，当子类中有指针成员变量时才会使用到。也就是说，虚析构函数使得删除指向子类的父类指针时，不仅可以调用父类的的析构函数，也会调用子类的析构函数，这样就可以释放子类指针成员变量在堆中的内存，达到防止内存泄漏的目的。
+
+```cpp
+#include <bits/stdc++.h>
+using namespace std;
+class CA
+{
+public:
+    CA() { cout << "CA" << endl; }
+    virtual void f1()
+    {
+        cout << "CA::f1( )" << endl;
+        // f2();
+    }
+    void f2()
+    {
+        cout << "CA::f2( )" << endl;
+    }
+    virtual ~CA()
+    {
+        cout << "~CA" << endl;
+    }
+};
+class CB : public CA
+{
+public:
+    CB() { cout << "CB" << endl; }
+
+    virtual void f1()
+    {
+        cout << "CB::f1( )" << endl;
+    }
+    void f2()
+    {
+        cout << "CB::f2( )" << endl;
+    }
+    virtual ~CB()
+    {
+        cout << "~CB" << endl;
+    }
+};
+class CC : public CB
+{
+public:
+    CC() { cout << "CC" << endl; }
+
+    void f1()
+    {
+        cout<<"CC:f1()"<<endl;
+    }
+    void f2()
+    {
+        cout << "CC:f2()" << endl;
+    }
+    virtual ~CC()
+    {
+        cout << "~CC" << endl;
+    }
+};
+int main()
+{
+    CA *pA = new CC();
+    pA->f1();
+    delete pA;
+    CA *pA1 = new CB();
+    pA1->f1();
+    delete pA;
+    return 0;
+}//注意看构造和析构的顺序，正好是相反的
+```
+
+
 
 ## g++和gcc的区别
 
@@ -286,3 +369,396 @@ int main()
 ## pointer-like-class的作用
 
 `pointer-like-class`是指类似指针的类，这种类一般用来模拟指针的行为，但是与裸指针相比具有更多的功能和安全性，如智能指针（Smart Pointers）、迭代器（Iterators）。Smart Pointers有`std::unique_ptr`和`std::shared_ptr`、`std::weak_ptr`。
+
+# 一：结构化程序设计方法
+
+## 位运算及其运用
+
+判断奇数还是偶数
+
+```cpp
+int a=11;
+int b=1;
+if(b&a){
+	cout << "is odd" <<endl;
+}else{
+	cout<< "is even" <<endl;
+}
+```
+
+取出指定的位
+
+```cpp
+int a=0b11101101;
+int b=0b1111;
+cout << bitset<sizeof(char)*8>(a&b)<<endl;
+```
+
+判断是否为2的整数幂（0b10 0000 & 0b01 1111），结果是0，说明是2的整数幂。
+
+```cpp
+int x = 64;
+int y = x - 1;
+cout << ((x & y) ? "no" : "yes") << endl;
+```
+
+## 指针数组与指向数组的指针的概念与使用
+
+a是一个指向含有三个int型数据数组的指针（如有int p[3]; a指向p是可以的 ）
+
+a1是一个函数三个int*型数据的数组（如a1可以初始化为{&b, &c, &d}）;
+
+```cpp
+#include <iostream>
+#include <typeinfo>
+using namespace std;
+#define sz(type) cout<<sizeof(type)<<endl;
+int main(){
+	int b=10, c=1, d=2;
+	int (*a)[3];
+	int* a1[3];
+ 	cout<<typeid(a).name()<<endl;
+ 	sz(a);
+ 	sz(a1);
+ 	sz(a1[0]);
+ 	sz(*a)
+ 	sz(a[0][0])
+	return 0;
+}
+```
+
+## 引用的分类与使用
+
+1、初始化，定义引用时需要加&，
+
+```cpp
+int a=1;
+int &b=a;//相当于给a取了一个别名
+```
+
+2、作为函数参数传递，c++在函数参数中传递数组时，直接变成了指针，因为如果将数组传递过去需要将值一个一个拷贝过去，增加了函数调用的开销，所以在 C++ 中，我们有了一种比指针更加便捷的传递聚合类型数据的方式，那就是**引用（Reference）**，通过这种方式传过去减少了生成副本的消耗。
+
+```cpp
+void swap(int &a, int &b){
+	int temp=a;
+	a=b;
+	b=temp;
+}
+```
+
+3、作为函数返回值来传递，例如重载左移运算符，需要输出多个内容就需要返回引用。
+
+```cpp
+#include <iostream>
+#include <typeinfo>
+using namespace std;
+#define sz(type) cout << sizeof(type) << endl;
+int function1(int &aa) // 以返回值的方法返回函数值
+{
+	return aa;
+}
+int &function2(int &aa) // 以引用方式返回函数值
+{
+	return aa;
+}
+int main()
+{
+	int a = 10;
+	// 第一种情况，系统生成要返回值的副本（即临时变量）
+	int b = function1(a); // function1()的返回值先储存在一个a的副本中，
+						  // 然后再把副本赋值给b
+	// 第二种情况，报错
+	//  function1(a) = 20;// function1()的返回值为临时变量，不能赋值（即不能为左值）
+	// 第三种情况，系统不会生成返回值的副本
+	function2(a) = 20; // OK  此时a的值变成了20
+	cout<<a<<endl;
+}
+```
+
+重载左移运算符，返回引用才会连续输出两个值；
+
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Point
+{
+public:
+    int x_, y_;
+    Point(int x, int y) : x_(x), y_(y) {}
+
+    friend ostream &operator<<(ostream &os, const Point &p)
+    {
+        os << p.x_ << " " << p.y_ << endl;
+        return os;
+    }
+};
+
+int main()
+{
+    Point p(1, 2);
+    cout<<p<<p;
+
+    return 0;
+}
+```
+
+## 变量的作用域和生命周期
+
+c++的内存主要分为一下几个部分：栈区、堆区、全局区（静态区）、文字常量区、程序代码区。
+
+全局变量
+
+> 存储在静态内存分配区，整个程序的生命周期都可以使用，其他文件使用关键字extern也可以使用
+
+局部变量
+
+> 存储在栈区，与函数共存亡
+
+全局静态变量
+
+> 与全局变量类似，也是存储在静态内存分配区，生命周期与整个程序同在，不过不能再其他文件使用。
+
+局部静态变量
+
+> 也是存储在静态内存分配区，调用函数后便一直存在，只不过只能在函数内可见。
+
+## 类型别名与类型推断
+
+1、别名：typedef、using
+
+2、推断：auto、decltype
+
+## STL顺序容器
+
+vector：视作可变大小的数组，可随机访问，在非尾部的位置插入比较慢
+
+deque：双端队列，支持随机访问，在头尾位置插入和删除比较快
+
+list：双向链表，支持双向顺序访问（rbegin()、rend()），在 list 任意位置插入和删除都比较快
+
+forward_list：单向链表，只能单向顺序访问，在 forward_list 的任意位置插入和删除都比较快
+
+array：固定大小的数组，支持随机访问，不能添加或者删除元素
+
+string：与 vector 类似，专门保存字符串，随机访问快，在尾部插入和删除快
+
+## STL关联容器
+
+map：键值对，一对一，基于红黑树，对关键字进行排序
+
+set：只保存关键字，不重复
+
+multimap：关键字可以重复的 map ，即一对多，如统计数学课的学生成绩
+
+multiset：保存可以重复的关键字
+
+unordered_map：键值对，一对一，基于哈希值，不对键值对进行排序
+
+unordered_set：只保存关键字，不排序
+
+unordered_multimap：键值对，一对多，基于哈希值
+
+unordered_multiset：保存可以重复的关键字，不排序
+
+## STL容器适配器
+
+包括：stack、queue、priority_queue
+
+ stack 和 queue 基于deque实现， priority_queue 基于 vector 实现
+
+## 流对象
+
+包括输入流对象（ostream，如std::cin，从键盘读取数据），输出流对象（istream，如std::cout，向屏幕写入数据）
+
+还有文件输入流对象（ifstream，使用 std::ifstream 来创建对象，将数据从文件中读取出来），文件输出流对象（ofstream，使用 std::ofstream 来创建对象，将数据写入文件）
+
+```cpp
+#include <iostream>
+#include <fstream>
+using namespace std;
+
+void test01()
+{
+    ofstream file;
+    file.open("text.txt", ios::out);
+
+    file << "xinm" << endl;
+    file << "namji" << endl;
+    file.close();
+}
+void test02()
+{
+    ifstream ifile;
+    ifile.open("text.txt", ios::in);
+    if(ifile.is_open()){
+        char buf[1024];
+        while(ifile >> buf)
+        {
+            cout<< buf<<endl;
+        }
+    }
+    ifile.close();
+}
+
+int main()
+{
+    test02();
+    return 0;
+}
+```
+
+使用二进制流读写文件
+
+```cpp
+#include <iostream>
+#include <fstream>
+using namespace std;
+class Person
+{
+public:
+    // Person(char name[], int age):name_(name), age_(age){}
+    char name_[20];
+    int age_;
+};
+
+void test01()
+{
+    ofstream file;
+    file.open("text.txt", ios::out | ios::binary);
+    Person p = {"hhhhh", 18};
+    file.write((const char *)&p, sizeof(p));
+   
+    file.close();
+}
+void test02()
+{
+    ifstream ifile;
+    ifile.open("text.txt", ios::in | ios::binary);
+    if (ifile.is_open())
+    {
+        // 1
+        // char buf[1024];
+        // while(ifile >> buf)
+        // {
+        //     cout<< buf<<endl;
+        // }
+
+        // 2
+        // char buf[1024];
+        // while (ifile.getline(buf, sizeof(buf)))
+        // {
+        //     cout << buf << endl;
+        // }
+
+        // 3
+        // string buf;
+        // while(getline(ifile, buf)){
+        //     cout << buf <<endl;
+        // }
+
+        Person p;
+        ifile.read((char *)&p, sizeof(p));
+        cout << p.name_ << p.age_ << endl;
+    }
+    ifile.close();
+}
+
+int main()
+{
+    test02();
+    return 0;
+}
+```
+
+## 异常处理的构造和析构函数
+
+若在 try 中抛出异常，在转到 catch 前，会对有关对象进行析构
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+//异常处理的构造和析构函数 
+class Student{
+	private:
+		string name;
+		int sno;
+	public:
+		Student(string name1,int sno1)
+		{
+			name=name1;
+			sno=sno1;
+		} 
+		~Student()
+		{
+			cout<<"Destruct Student:"<<sno<<endl;
+		}
+		void checkSno()
+		{
+			if(sno==0)
+			{
+				throw sno;
+			}
+			else
+			{
+				cout<<name<<":"<<sno<<endl; 
+			}
+		}
+};
+
+int main()
+{
+	try
+	{
+		Student a("pink",1);
+		a.checkSno();
+		Student b("floyd",0); //构造对象
+		b.checkSno();  //抛出异常跳到catch语句块中
+	}
+	catch(int)
+	{
+		cout<<"error:sno=0!"<<endl;
+	}
+	return 0;
+}
+```
+
+可以看到上面这段代码的输出结果是先对a、b析构然后再转到catch输出内容。
+
+## 类模板与继承
+
+要注意继承的时候要加上基类的类型
+
+```cpp
+#include <iostream>
+
+using namespace std;
+
+template<class T>
+class Base
+{
+    public:
+    T c;
+};
+
+template<class T>
+class Deri: public Base<T>
+{
+    public:
+    T a;
+};
+
+int main()
+{
+    Deri<int> d;
+    d.a=4;
+    d.c=6;
+    cout <<d.Base::c<<endl;
+    // cout << sizeof(Deri<int>)<<endl;
+    return 0;
+}
+```
+

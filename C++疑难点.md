@@ -762,3 +762,47 @@ int main()
 }
 ```
 
+## 继承时不能被继承的函数
+
+包括：构造函数、拷贝构造函数、析构函数，注意：operator=函数是可以被继承的
+
+```cpp
+#include <iostream>
+#include <cstring>
+using namespace std;
+
+class A{
+public:
+	A(){
+	}
+	A(int price, int weight):price_(price), weight_(weight){
+	}
+	A& operator=(const A& a){
+		cout << "operator=1" << endl;
+	}
+private:
+	int price_;
+	int weight_;
+};
+
+class B: public A{
+public:
+	B(int price, int weight):price_(price), weight_(weight){
+	}
+private:
+	int price_;
+	int weight_;
+};
+
+int main(){
+//	A a1(1,0);
+//	A a2;
+//	a2=a1;
+	B b1(10,0),b2(2,0);
+	b2=b1;
+	return 0;
+} 
+```
+
+上面说明operator=函数被继承下去了。
+

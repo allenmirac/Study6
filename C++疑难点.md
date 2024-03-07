@@ -806,3 +806,92 @@ int main(){
 
 上面说明operator=函数被继承下去了。
 
+## 静态数据成员的只能在类外初始化
+
+类内定义，类外初始化一次，然后在整个程序运行期间都可以存在
+
+原因
+
+1、静态成员变量存储在静态存储区域内，在编译阶段就为他们分配内存空间，
+
+2、静态成员变量是类级别的，他在所有类实例中是公有的，如果允许在类内部初始化，就可能导致每个实例都有一个独立的副本
+
+3、这样可以避免多次初始化
+
+```cpp
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+#include <math.h>
+using namespace std;
+class Point
+{
+public:
+	Point(int x, int y) : x_(x), y_(y)
+	{
+	}
+	void setX(int val)
+	{
+		x_ = val;
+	}
+	void setY(int val)
+	{
+		y_ = val;
+	}
+	int getX() const
+	{
+		return x_;
+	}
+	int getY() const
+	{
+		return y_;
+	}
+
+private:
+	int x_;
+	int y_;
+};
+class Circle
+{
+public:
+	Circle(int x, int y, int r) : center_(x, y), r_(r)
+	{
+		num_++;
+		cout << "Circle number: " << getNum() << endl;
+		;
+	}
+	static int getNum()
+	{
+		return num_;
+	}
+	friend double getDistance(const Circle &c1, const Circle &c2);
+
+private:
+	static int num_;
+	Point center_;
+	int r_;
+};
+
+int Circle::num_ = 0;
+double getDistance(const Circle &c1, const Circle &c2)
+{
+		double x=double(c2.center_.getX()-c1.center_.getX());
+		double y=double(c2.center_.getY()-c1.center_.getY());
+		return sqrt(x*x + y*y);
+}
+
+void testCircle()
+{
+	Circle c1(1, 2, 3);
+	Circle c2(4, 6, 2);
+	cout << getDistance(c1, c2) << endl;
+}
+
+int main()
+{
+	testCircle();
+	return 0;
+}
+```
+

@@ -4,7 +4,7 @@
 
 调用成员函数时，成员函数通过一个名为 this 的隐式参数来访问调用它的那个对象，用请求该函数的对象地址初始化 this ，this 的指向总是自己这个对象，所以 this 是一个常量指针
 
-```c++
+```cpp
 Box* get_address()   //得到this的地址
 {
 	return this;
@@ -21,7 +21,7 @@ Box* get_address()   //得到this的地址
 
 ## 友元函数和运算符重载
 
-```c++
+```cpp
 #include <iostream>
 #include <cmath>
 using namespace std;
@@ -135,6 +135,32 @@ int main()
 }
 ```
 
+## 类型转换运算符重载
+
+可以实现两个类之间使用=赋值
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class A{
+};
+
+class B{
+public:
+	operator A(){
+		return A();
+	}
+};
+
+int main(){
+	A a;
+	B b;
+	a=b;
+	return 0;
+}
+```
+
 
 
 ## 不能重载的运算符
@@ -169,7 +195,7 @@ int main()
 
 然后是如果父类中虚函数是private或者protected，这些函数依旧会存在于虚函数表中，可以通过多态的方式来访问。
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 class Father
@@ -206,6 +232,44 @@ int main() {
 ## 菱形继承的问题
 
 继承关系画成图像一个菱形，所以就叫做菱形继承，采用**虚继承**来解决二义性问题。
+
+```cpp
+#include <iostream>
+using namespace std;
+class A
+{
+public:
+	int n;
+};
+class B : virtual public A
+{
+};
+class C : virtual public A
+{
+};
+class D : public A
+{
+};
+class E : public B, public C, public D
+{
+public:
+	int getn() { return B::n; }
+};
+int main()
+{
+	E d;
+	d.B::n = 10;
+	d.C::n = 20;
+	d.D::n = 30;
+	cout << d.B::n << endl;
+	cout << d.C::n << endl;
+	cout << d.D::n << endl;
+    cout << d.getn() << endl;
+	return 0;
+}
+```
+
+可以先在脑子里想一下结果，然后可以运行一下看看是否与其一致，有助于理解哦。
 
 ## 虚析构
 
@@ -671,6 +735,65 @@ int main()
     return 0;
 }
 ```
+
+从txt文件中读出的以空格为间隔的数字，并排序
+
+```cpp
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+#include <vector>
+#include <fstream>
+using namespace std;
+void readFromTxt(char* path, vector<int> &v){
+	ifstream iFile;
+	iFile.open(path, ios::in);
+	if(iFile.is_open()){
+		string s;
+		while(iFile>>s){
+//			v.push_back(s[0]-'0');
+			cout << s << endl;
+			int num=0;
+			for(int i=0; i<s.size(); i++){
+				num=num*10+s[i]-'0';
+			}
+			v.push_back(num);
+		}
+	}
+	cout << "v" << endl;
+	for(auto i:v){
+		cout << i<< endl;
+	}
+}
+void selectSort(vector<int> &v){
+	int n=v.size();
+	for(int i=0; i<n; i++){
+		int min=i;
+		for(int j=i+1; j<n; j++){
+			if(v[j]<v[min]) min=j;
+		}
+		swap(v[i], v[min]);
+	}
+	
+}
+void testReadFromTxt(){
+	char* path="a.txt";
+	vector<int> v;
+	readFromTxt(path, v);
+	selectSort(v);
+	cout << "v" << endl;
+	for(auto i: v){
+		cout << i << endl;
+	}
+}
+int main(){
+	testReadFromTxt();
+	return 0;
+}
+```
+
+
 
 ## 异常处理的构造和析构函数
 

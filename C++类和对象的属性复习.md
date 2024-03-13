@@ -6,7 +6,7 @@
 
 内部值不能修改，即：只能读，不能写。防止误操作
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -42,7 +42,7 @@ int main()
 
 无法用成员函数写这个函数，因为不能把左移cout写在左边
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -70,7 +70,7 @@ int main()
 
 ## 运算符加号重载
 
-```c++
+```cpp
 //1、成员函数重载+号
 Person operator+(Person &p){
     Person temp;
@@ -95,11 +95,13 @@ Person p3 = operator+(p1, p2);
 
 
 
-## 友元类技术
+## 友元技术
 
 利用友元类技术，可以访问私有类型
 
-```c++
+当一个非成员函数需要直接访问类的私有成员时，可以将其声明为友元函数。而如果非成员函数不需要直接访问类的私有成员，那么就不必将其声明为友元函数，这种情况下，非成员函数可以通过类的公有接口进行访问，而无需成为友元函数。
+
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -109,7 +111,12 @@ private:
     friend class FriendClass;
 public:
     MyClass(int a): a_(a){}
+    int getA()const {return a_;}
 };
+
+MyClass operator+(const MyClass& m1, const MyClass& m2){
+    return MyClass(m1.getA()+m2.getA());
+}
 
 class FriendClass{
 public:
@@ -124,6 +131,9 @@ int main(){
     FriendClass friendClass;
     friendClass.accessPrivateMember(my);
 
+	MyClass my1(20);
+	MyClass my2 = my+my1;
+	cout << my2.getA() << endl;
     return 0;
 }
 ```
@@ -140,7 +150,7 @@ int main(){
 
 当类内存在其他类成员时，构造函数顺序是先成员变量的构造函数，后本类的构造函数，析构顺序则相反
 
-```c++
+```cpp
 #include <iostream>
 #include <string>
 using namespace std;
@@ -243,7 +253,7 @@ Spot spot3(spot2);
 
 （3）、函数的返回值是一个对象，执行return语句时，系统会自动调用拷贝构造函数创建返回值。
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -311,7 +321,7 @@ https://blog.csdn.net/ykm0722/article/details/7031387
 
 普通成员变量在类中只能声明可是不能定义，类在定义后并不分配存储空间，而是在定义类的对象的时候才分配存储空间，相反静态的数据成员和静态的成员函数是已经在内存中开辟了内存空间了，所以静态数据成员可以独立的访问在任何类对象没有建立起来都可以访问。
 
-你们班里面有10个人（10个比如高一一班的对象），体育老师分给你们一个篮球（静态成员函数），你们每个人都带了一个篮球（非静态成员数），你们都很小气，自己的球只能自己拍，要是5对5打比赛，那就只能用那个静态的篮球了（每个人都可以拿来用，但是带来的影响是对全体的）。因此，我可以说那个篮球是高一一班的成员。所以也就是说：静态成员函数是类的成员函数（因为高一二班就不能拿来玩），但是这个篮球最后还是要还给老师的，任何私人不得占有。希望这样你能明白，其实在内存空间里面说白了静态的成员的内存是唯一的一份，就是当你在类外声明他时开辟的，但是非静态函数的空间分配是在你实例化对象时创建的。
+你们班里面有10个人（10个比如高一一班的对象），体育老师分给你们一个篮球（静态成员函数），你们每个人都带了一个篮球（非静态成员数），你们都很小气，自己的球只能自己拍，要是5对5打比赛，那就只能用那个静态的篮球了（每个人都可以拿来用，但是带来的影响是对全体的）。因此，我可以说那个篮球是高一一班的成员。所以也就是说：静态成员函数是类的成员函数（因为高一二班就不能拿来玩），但是这个篮球最后还是要还给老师的，任何私人不得占有。希望这样你能明白，其实在内存空间里面说白了静态的成员的内存是唯一的一份，就是当你在类内声明他时开辟的，但是非静态函数的空间分配是在你实例化对象时创建的。
 
 静态成员变量是所有的类共有的，它有两种访问方式：
 
@@ -325,7 +335,7 @@ https://blog.csdn.net/ykm0722/article/details/7031387
 
 静态成员函数也有访问权限
 
-```c++
+```cpp
 #include <iostream>
 #include <string>
 using namespace std;
@@ -364,9 +374,13 @@ int main()
 
 ## 友元类函数
 
-定义友元类函数，再类外部定义时不能访问private成员，而在类内定义可以，程序如下
+~~定义友元类函数，再类外部定义时不能访问private成员，而在类内定义可以，~~
 
-```c++
+上面说法是错误的，原因是类外那个函数的定义的形参并没有+const，与类内的声明不相同，导致变成了一个普通函数。
+
+程序如下
+
+```cpp
 #include <iostream>
 #include <cmath>
 using namespace std;
@@ -376,10 +390,10 @@ class Point
     int y;
 
 public:
-    friend float Distance(const Point &p1, const Point &p2)
-    {
-        return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
-    }
+    friend float Distance(const Point &p1, const Point &p2);
+    // {
+    //     return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
+    // }
     Point(const int &X, const int &Y)
     {
         x = X;
@@ -391,16 +405,98 @@ public:
 //{
 //	return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
 //}
+float Distance(const Point& p1, const Point& p2)
+{
+	return sqrt(pow(p2.x - p1.x, 2) + pow(p2.y - p1.y, 2));
+}
 int main()
 {
     Point p1(10, 10), p2(11, 11);
     cout << Distance(p1, p2);
-}                
+}
 ```
 
 ## 继承
 
-如果子类中有与父类中同名的成员函数，直接调用是调用子类中的，子类中的同名的成员函数会覆盖父类中所有同名成员函数
+如果子类中有与父类中同名的成员函数，直接调用是调用子类中的，子类中的同名的成员函数会覆盖父类中所有同名成员函数，如果想要访问的话，需要加上父类的作用域
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class Parent {
+public:
+    void display() {
+        cout << "Parent class display() function" << endl;
+    }
+};
+
+class Child : public Parent {
+public:
+    void display() {
+        cout << "Child class display() function" << endl;
+        
+        // 调用父类中的 display() 函数
+        // Parent::display();
+    }
+};
+
+int main() {
+    Child obj;
+    obj.Parent::display();
+    
+    return 0;
+}
+```
+
+
+
+## 继承的时候构造析构的顺序
+
+如果没有出现组合，构造顺序是：先按照继承的顺序构造，然后是自己的构造函数
+
+若出现组合，构造顺序：先按照继承顺序构造，然后是成员对象的构造，最后是自己的构造函数
+
+```cpp
+#include<iostream>
+using namespace std;
+class B1
+{
+public:
+    B1(){cout<<"B1"<<endl;}
+    B1(int i){cout<<"B1:"<<i<<endl;}
+	~B1(){
+		cout << "Des B1" << endl;
+
+	}
+};
+class B2
+{
+public:
+    B2(){cout<<"B2"<<endl;}
+    B2(int i){cout<<"B2:"<<i<<endl;}
+	~B2(){
+		cout << "Des B2" << endl;
+
+	}
+};
+class C:public B2,public B1
+{
+public:
+    C():B1(10),B2(20){cout<<"C"<<endl;};
+	C(int a, int b):B1(a), B2(b){cout<<"C2"<<endl;}
+	~C(){
+		cout << "Des C" << endl;
+	}
+};
+int main()
+{
+    C obj;
+    return 0;
+}
+```
+
+
 
 ## 多继承
 
@@ -408,7 +504,7 @@ int main()
 
 [(11条消息) 多继承的概念和优缺点_HappyJandun's 学习笔录-CSDN博客_多继承的优缺点](https://blog.csdn.net/jandunlab/article/details/14110117)
 
-```c++
+```cpp
 #include<iostream>
 using namespace std;
 
@@ -454,11 +550,11 @@ int main()
 
 （1）加上全局符确定调用哪一份拷贝。比如pa.Author::eat()调用属于Author的拷贝。
 
-（2）使用虚拟继承，使得多重继承类Programmer_Author只拥有Person类的一份拷贝。比如在11行和17行的继承语句中加入virtual就可以了。
+（2）使用虚拟继承，使得多重继承类Programmer_Author只拥有Person类的一份拷贝。比如在类 Author 和 Programmer 的继承前加入virtual就可以了。
 
 ## 虚函数
 
-```c++
+```cpp
 #include <iostream>
 #include <string>
 using namespace std;
@@ -528,7 +624,7 @@ int main()
 
 **一般语法**
 
-```c++
+```cpp
 virtual void print() =0;//纯虚函数，可以有函数体，可实例化的派生类必须重写它
 ```
 
@@ -540,7 +636,7 @@ virtual void print() =0;//纯虚函数，可以有函数体，可实例化的派
 
 ## 模板函数的重载
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 template <typename T>
@@ -569,7 +665,7 @@ int main()
 
 定义一个简单的Array的类模板：
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -621,7 +717,7 @@ int main()
 
 **继承中的类模板：**
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -713,16 +809,16 @@ CSDN博客：
 
 
 
-## 关于c++的常量的一点说明
+## 关于C++的常量的一点说明
 
-我们说过，c++“真常量”只针对内置数据类型，自己定义的类，编译器没法帮你“内传折叠”，所以仍是“假常量”，是能通过指针“篡次的
+我们说过，C++“真常量”只针对内置数据类型，自己定义的类，编译器没法帮你“内传折叠”，所以仍是“假常量”，是能通过指针“篡次的
 另外常量是“建没性”的预防措施，并不能防蓄意破坏。
 
-c++中的真常量只针对其内置数据类型，对于自己定义的类的，是假常量，可以通过指针修改
+C++中的真常量只针对其内置数据类型，对于自己定义的类的，是假常量，可以通过指针修改
 
 ## 菱形的继承体系
 
-```c++
+```cpp
 class A
 {
 public:
@@ -795,9 +891,11 @@ C++中的虚函数的作用主要是实现了多态的机制。关于多态，�
 
 **既可以在类的声明中，也可以在函数定义中声明缺省参数，但不能既在类声明中又在函数定义中同时声明缺省参数。**
 
+# 杂谈
+
 ## Union
 
-```c++
+```cpp
 #include<iostream>
 using namespace std;
 union myun
@@ -833,7 +931,7 @@ vector vs = {"hello", "world"};比如这里就将const char转为string，但是
 
 auto 不利：降低代码可读性、可能得不到你预想的类型、配合decltype有意想不到的结果
 
-```c++
+```cpp
 2022-4-18
 // (4)
 for (auto &elem:vec) // pass by reference
@@ -861,7 +959,7 @@ Lambda 表达式是 C++11 引入的一个重要特性，它允许我们定义匿
 
 Lambda 表达式的一般形式如下：
 
-```c++
+```cpp
 Copy Code[capture list](parameter list) -> return type {function body}
 ```
 
@@ -872,7 +970,7 @@ Copy Code[capture list](parameter list) -> return type {function body}
 - `return type`：返回类型，指定函数的返回类型（可以自动推导）。
 - `function body`：函数体，包含函数需要执行的代码。
 
-```c++
+```cpp
 #include <iostream>
 
 int main() {
@@ -892,7 +990,7 @@ int main() {
 
 ### 简单单例模式
 
-```c++
+```cpp
 //懒汉模式：只有在第一次用到的时候才会实例化
 class singleton {
     private:
@@ -935,7 +1033,7 @@ singleton* singleton::instance() {
 
 ### 加了锁的单例模式
 
-```c++
+```cpp
 #include <iostream>
 #include <thread>         // std::thread 
 #include <mutex>          // std::mutex
@@ -1007,7 +1105,7 @@ int main() {
 }
 ```
 
-```c++
+```cpp
 #include <iostream>
 #include <thread>         // std::thread 
 #include <mutex>          // std::mutex
@@ -1067,7 +1165,7 @@ int main() {
 
 ### Scott Meyer/简洁的singleton写法
 
-```c++
+```cpp
 Singleton *Singleton::getinstance(){    static Singleton p;    return &p; }               
 ```
 
@@ -1079,8 +1177,14 @@ Singleton *Singleton::getinstance(){    static Singleton p;    return &p; }
 
 解耦，就是将程序积木化
 
-就像我们玩的积木一样，各个积木可以**组合**在一起而形成一个形状，又可以**拆分**，又可以**替换**，因
-
-为基本上各个积木块都是**独立**的，只要他们之间的接口（形状）匹配，就可以灵活地组合在一起。
+就像我们玩的积木一样，各个积木可以**组合**在一起而形成一个形状，又可以**拆分**，又可以**替换**，因为基本上各个积木块都是**独立**的，只要他们之间的接口（形状）匹配，就可以灵活地组合在一起。
 
 当然，这是理想状态。**解耦是在逐达到这个理想状态。**
+
+在实际开发中有几种方式实现解耦：
+
+1、使用接口隔离
+
+2、采用事件驱动架构
+
+3、使用设计模式，提高灵活度

@@ -1,6 +1,6 @@
 ## const修饰指针
 
-```c++
+```cpp
 #include <iostream>
 
 using namespace std;
@@ -85,7 +85,7 @@ int main(){
 
 指针有减法和比较运算，没有加法运算。
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 #define sz(type) cout<<sizeof(type)<<endl;
@@ -122,7 +122,7 @@ https://blog.csdn.net/ykm0722/article/details/7031387
 
 使用swap（交换两个变量的值）作为演示，实现Swap的四种方法。当数组名作为**函数的参数**来传递的时候，他的高贵的数组结构特性已经失去了，成了一个地地道道的只拥有4个字节的平民。
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 #define SWAP(a, b, temp) (temp=a, a=b, b=temp);
@@ -161,7 +161,7 @@ int main(){
 
 要作为返回值，必须保证调用后返回的指针不会销毁，否则就是野指针。
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 int a[3];//全局变量默认初始化为0
@@ -179,7 +179,7 @@ int main(){
 
 1、str和p是不相同的！！
 
-```c++
+```cpp
 #include <iostream>
 #include <cstring>
 
@@ -202,7 +202,7 @@ int main() {
 
 2、此处会有一个warning，因为“ab”是存储在常量区域的，不能修改，在使用时需要使用const来申明
 
-```c++
+```cpp
 #include <iostream>
 #include <cstring>
 
@@ -221,7 +221,7 @@ int main() {
 
 3、此处会显示error: assignment of read-only location '* p'
 
-```c++
+```cpp
 #include <iostream>
 #include <cstring>
 
@@ -239,7 +239,7 @@ int main() {
 
 4、字符数组指针的初始化
 
-```c++
+```cpp
 #include <iostream>
 #include <cstring>
 using namespace std;
@@ -263,7 +263,7 @@ int main() {
 
 主要要把指针括起来
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 void func(){
@@ -291,7 +291,7 @@ int main(){
 
 ## 函数指针数组
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 void func(){
@@ -328,7 +328,7 @@ int main(){
 
 ！！！！！！！！！！！！！
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 void func(){
@@ -362,7 +362,7 @@ int main(){
 
 ## 结构体内存对齐
 
-```c++
+```cpp
 #include <iostream>
 using namespace std;
 
@@ -401,7 +401,7 @@ int main(){
 
 ## 结构体指针
 
-```c++
+```cpp
 #include <iostream>
 #include <cstring>
 using namespace std;

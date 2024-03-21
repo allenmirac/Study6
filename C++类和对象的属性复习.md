@@ -321,6 +321,29 @@ int main() {
 
 上面三个都是一次默认构造，一次拷贝构造，两次析构。`myFunction`和`myFunction1`的区别：按值传递会触发拷贝构造函数，按引用传递不会触发，但是传递返回值时会触发拷贝构造函数，所以输出结果相同
 
+## 隐式转换
+
+```cpp
+#include <iostream>
+using namespace std;
+
+class A{
+public: 
+    // explicit
+     A(int i=0){ cout << "Cons" << endl;}
+     A(const A&){ cout << "Copy" << endl;}
+    A& operator=(const A&){cout << "Operator=" << endl;return *this;}
+};
+int main(){
+    // A a=3;
+    A a1;
+    a1=3;
+    return 0;
+}
+```
+
+a1=3这行代码会调用构造函数，将3隐式转换为A类型（可以通过在A前面+explicit来验证），然后调用operator=函数，就是上面的第一个时机。
+
 ## C/C++数组名与指针区别
 
 https://blog.csdn.net/ykm0722/article/details/7031387
